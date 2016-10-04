@@ -849,6 +849,13 @@ uint32_t InputDefault::joy_axis(uint32_t p_last_id, int p_device, int p_axis, co
 		return p_last_id;
 	}
 
+	if (ABS(joy.last_axis[p_axis]) > 0.5 && joy.last_axis[p_axis] * p_value.value < 0) {
+		//changed direction quickly, insert fake event to release pending inputmap actions
+		JoyAxis jx;
+		jx.min = p_value.min;
+		jx.value = p_value.value < 0 ? 0.1 : -0.1;
+		p_last_id = joy_axis(p_last_id, p_device, p_axis, jx);
+	}
 
 	joy.last_axis[p_axis] = p_value.value;
 	float val = p_value.min == 0 ? -1.0f + 2.0f * p_value.value : p_value.value;
@@ -1151,4 +1158,62 @@ Array InputDefault::get_connected_joysticks() {
 		elem = elem->next();
 	}
 	return ret;
+}
+
+static const char* _buttons[] = {
+	"Face Button Bottom",
+	"Face Button Right",
+	"Face Button Left",
+	"Face Button Top",
+	"L",
+	"R",
+	"L2",
+	"R2",
+	"L3",
+	"R3",
+	"Select",
+	"Start",
+	"DPAD Up",
+	"DPAD Down",
+	"DPAD Left",
+	"DPAD Right"
+};
+
+static const char* _axes[] = {
+	"Left Stick X",
+	"Left Stick Y",
+	"Right Stick X",
+	"Right Stick Y",
+	"",
+	"",
+	"L2",
+	"R2"
+};
+
+String InputDefault::get_joy_button_string(int p_button) {
+	ERR_FAIL_INDEX_V(p_button, JOY_BUTTON_MAX, "");
+	return _buttons[p_button];
+}
+
+int InputDefault::get_joy_button_index_from_string(String p_button) {
+	for (int i = 0; i < JOY_BUTTON_MAX; i++) {
+		if (p_button == _buttons[i]) {
+			return i;
+		}
+	}
+	ERR_FAIL_V(-1);
+}
+
+String InputDefault::get_joy_axis_string(int p_axis) {
+	ERR_FAIL_INDEX_V(p_axis, JOY_AXIS_MAX, "");
+	return _axes[p_axis];
+}
+
+int InputDefault::get_joy_axis_index_from_string(String p_axis) {
+	for (int i = 0; i < JOY_AXIS_MAX; i++) {
+		if (p_axis == _axes[i]) {
+			return i;
+		}
+	}
+	ERR_FAIL_V(-1);
 }

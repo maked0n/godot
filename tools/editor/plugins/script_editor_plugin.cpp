@@ -755,29 +755,10 @@ void ScriptEditor::_menu_option(int p_option) {
 		} break;
 		case FILE_SAVE_ALL: {
 
-			if (!_test_script_times_on_disk())
+			if (_test_script_times_on_disk())
 				return;
 
 			save_all_scripts();
-
-#if 0
-			for(int i=0;i<tab_container->get_child_count();i++) {
-
-				ScriptTextEditor *se = tab_container->get_child(i)->cast_to<ScriptTextEditor>();
-				if (!se)
-					continue;
-
-
-				Ref<Script> script = se->get_edited_script();
-
-				if (script->get_path()=="" || script->get_path().find("local://")!=-1 || script->get_path().find("::")!=-1)
-					continue; //internal script, who cares
-
-
-				editor->save_resource( script );
-			}
-
-#endif
 		} break;
 		case FILE_IMPORT_THEME: {
 			file_dialog->set_mode(EditorFileDialog::MODE_OPEN_FILE);
@@ -1362,10 +1343,8 @@ struct _ScriptEditorItemData {
 
 void ScriptEditor::_update_script_colors() {
 
-	bool enabled = EditorSettings::get_singleton()->get("text_editor/script_temperature_enabled");
+	bool script_temperature_enabled = EditorSettings::get_singleton()->get("text_editor/script_temperature_enabled");
 	bool highlight_current = EditorSettings::get_singleton()->get("text_editor/highlight_current_script");
-	if (!enabled)
-		return;
 
 	int hist_size = EditorSettings::get_singleton()->get("text_editor/script_temperature_history_size");
 	Color hot_color=EditorSettings::get_singleton()->get("text_editor/script_temperature_hot_color");
@@ -1379,22 +1358,25 @@ void ScriptEditor::_update_script_colors() {
 			continue;
 
 		script_list->set_item_custom_bg_color(i,Color(0,0,0,0));
-		if (!n->has_meta("__editor_pass")) {
-			continue;
-		}
-
-		int pass=n->get_meta("__editor_pass");
-		int h = edit_pass - pass;
-		if (h>hist_size) {
-			continue;
-		}
-		int non_zero_hist_size = ( hist_size == 0 ) ? 1 : hist_size;
-		float v = Math::ease((edit_pass-pass)/float(non_zero_hist_size),0.4);
 
 		bool current = tab_container->get_current_tab() == c;
 		if (current && highlight_current) {
 			script_list->set_item_custom_bg_color(i, EditorSettings::get_singleton()->get("text_editor/current_script_background_color"));
-		} else {
+
+		} else if (script_temperature_enabled) {
+
+			if (!n->has_meta("__editor_pass")) {
+				continue;
+			}
+
+			int pass=n->get_meta("__editor_pass");
+			int h = edit_pass - pass;
+			if (h>hist_size) {
+				continue;
+			}
+			int non_zero_hist_size = ( hist_size == 0 ) ? 1 : hist_size;
+			float v = Math::ease((edit_pass-pass)/float(non_zero_hist_size),0.4);
+
 			script_list->set_item_custom_bg_color(i,hot_color.linear_interpolate(cold_color,v));
 		}
 	}

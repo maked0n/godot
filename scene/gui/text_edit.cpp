@@ -1651,7 +1651,7 @@ void TextEdit::_input_event(const InputEvent& p_input_event) {
 					update();
 				}
 
-				if (mb.button_index==BUTTON_RIGHT) {
+				if (mb.button_index==BUTTON_RIGHT && context_menu_enabled) {
 
 					menu->set_pos(get_global_transform().xform(get_local_mouse_pos()));
 					menu->set_size(Vector2(1,1));
@@ -2542,7 +2542,9 @@ void TextEdit::_input_event(const InputEvent& p_input_event) {
 
 				} break;
 				case KEY_X: {
-
+					if (readonly) {
+						break;
+					}
 					if (!k.mod.command || k.mod.shift || k.mod.alt) {
 						scancode_handled=false;
 						break;
@@ -2574,7 +2576,9 @@ void TextEdit::_input_event(const InputEvent& p_input_event) {
 						undo();
 				} break;
 				case KEY_V: {
-
+					if (readonly) {
+						break;
+					}
 					if (!k.mod.command || k.mod.shift || k.mod.alt) {
 						scancode_handled=false;
 						break;
@@ -4527,18 +4531,22 @@ void TextEdit::menu_option(int p_option) {
 
 	switch( p_option ) {
 		case MENU_CUT: {
-
-			cut();
+			if (!readonly) {
+				cut();
+			}
 		} break;
 		case MENU_COPY: {
 			copy();
 		} break;
 		case MENU_PASTE: {
-
-			paste();
+			if (!readonly) {
+				paste();
+			}
 		} break;
 		case MENU_CLEAR: {
-			clear();
+			if (!readonly) {
+				clear();
+			}
 		} break;
 		case MENU_SELECT_ALL: {
 			select_all();
@@ -4561,6 +4569,9 @@ bool TextEdit::is_selecting_identifiers_on_hover_enabled() const {
 	return select_identifiers_enabled;
 }
 
+void TextEdit::set_context_menu_enabled(bool p_enable) {
+	context_menu_enabled = p_enable;
+}
 
 PopupMenu *TextEdit::get_menu() const {
 	return menu;
@@ -4781,6 +4792,7 @@ TextEdit::TextEdit()  {
 	window_has_focus=true;
 	select_identifiers_enabled=false;
 
+	context_menu_enabled=true;
 	menu = memnew( PopupMenu );
 	add_child(menu);
 	menu->add_item(TTR("Cut"),MENU_CUT,KEY_MASK_CMD|KEY_X);
