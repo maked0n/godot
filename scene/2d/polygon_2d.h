@@ -3,9 +3,10 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,11 +34,11 @@
 
 class Polygon2D : public Node2D {
 
-	OBJ_TYPE(Polygon2D,Node2D);
+	GDCLASS(Polygon2D, Node2D);
 
-	DVector<Vector2> polygon;
-	DVector<Vector2> uv;
-	DVector<Color> vertex_colors;
+	PoolVector<Vector2> polygon;
+	PoolVector<Vector2> uv;
+	PoolVector<Color> vertex_colors;
 	Color color;
 	Ref<Texture> texture;
 	Size2 tex_scale;
@@ -46,60 +47,63 @@ class Polygon2D : public Node2D {
 	float tex_rot;
 	bool invert;
 	float invert_border;
+	bool antialiased;
 
 	Vector2 offset;
 	mutable bool rect_cache_dirty;
 	mutable Rect2 item_rect;
 
-	void _set_texture_rotationd(float p_rot);
-	float _get_texture_rotationd() const;
-
 protected:
-
 	void _notification(int p_what);
 	static void _bind_methods();
+
 public:
+	void set_polygon(const PoolVector<Vector2> &p_polygon);
+	PoolVector<Vector2> get_polygon() const;
 
-	void set_polygon(const DVector<Vector2>& p_polygon);
-	DVector<Vector2> get_polygon() const;
+	void set_uv(const PoolVector<Vector2> &p_uv);
+	PoolVector<Vector2> get_uv() const;
 
-	void set_uv(const DVector<Vector2>& p_uv);
-	DVector<Vector2> get_uv() const;
-
-	void set_color(const Color& p_color);
+	void set_color(const Color &p_color);
 	Color get_color() const;
 
-	void set_vertex_colors(const DVector<Color>& p_colors);
-	DVector<Color> get_vertex_colors() const;
+	void set_vertex_colors(const PoolVector<Color> &p_colors);
+	PoolVector<Color> get_vertex_colors() const;
 
-	void set_texture(const Ref<Texture>& p_texture);
+	void set_texture(const Ref<Texture> &p_texture);
 	Ref<Texture> get_texture() const;
 
-	void set_texture_offset(const Vector2& p_offset);
+	void set_texture_offset(const Vector2 &p_offset);
 	Vector2 get_texture_offset() const;
 
 	void set_texture_rotation(float p_rot);
 	float get_texture_rotation() const;
 
-	void set_texture_scale(const Size2& p_scale);
+	void set_texture_rotation_degrees(float p_rot);
+	float get_texture_rotation_degrees() const;
+
+	void set_texture_scale(const Size2 &p_scale);
 	Size2 get_texture_scale() const;
 
-	void set_invert(bool p_rot);
+	void set_invert(bool p_invert);
 	bool get_invert() const;
 
-	void set_invert_border(float p_border);
+	void set_antialiased(bool p_antialiased);
+	bool get_antialiased() const;
+
+	void set_invert_border(float p_invert_border);
 	float get_invert_border() const;
 
-	void set_offset(const Vector2& p_offset);
+	void set_offset(const Vector2 &p_offset);
 	Vector2 get_offset() const;
 
 	//editor stuff
 
-	virtual void edit_set_pivot(const Point2& p_pivot);
-	virtual Point2 edit_get_pivot() const;
-	virtual bool edit_has_pivot() const;
+	virtual void _edit_set_pivot(const Point2 &p_pivot);
+	virtual Point2 _edit_get_pivot() const;
+	virtual bool _edit_use_pivot() const;
 
-	virtual Rect2 get_item_rect() const;
+	virtual Rect2 _edit_get_rect() const;
 
 	Polygon2D();
 };

@@ -3,9 +3,10 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,9 +33,9 @@ class FileAccess;
 
 class PCKPacker : public Reference {
 
-	OBJ_TYPE(PCKPacker, Reference);
+	GDCLASS(PCKPacker, Reference);
 
-	FileAccess* file;
+	FileAccess *file;
 	int alignment;
 
 	static void _bind_methods();
@@ -49,10 +50,9 @@ class PCKPacker : public Reference {
 	Vector<File> files;
 
 public:
-	Error pck_start(const String& p_file, int p_alignment);
-	Error add_file(const String& p_file, const String& p_src);
+	Error pck_start(const String &p_file, int p_alignment);
+	Error add_file(const String &p_file, const String &p_src);
 	Error flush(bool p_verbose = false);
-
 
 	PCKPacker();
 	~PCKPacker();

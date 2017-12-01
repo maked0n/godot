@@ -3,9 +3,10 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -28,78 +29,79 @@
 /*************************************************************************/
 #include "register_types.h"
 
-#include "visual_script.h"
-#include "visual_script_editor.h"
+#include "core/engine.h"
 #include "io/resource_loader.h"
-#include "visual_script_nodes.h"
-#include "visual_script_func_nodes.h"
+#include "visual_script.h"
 #include "visual_script_builtin_funcs.h"
-#include "visual_script_flow_control.h"
-#include "visual_script_yield_nodes.h"
+#include "visual_script_editor.h"
 #include "visual_script_expression.h"
+#include "visual_script_flow_control.h"
+#include "visual_script_func_nodes.h"
+#include "visual_script_nodes.h"
+#include "visual_script_yield_nodes.h"
 
-
-VisualScriptLanguage *visual_script_language=NULL;
-
+VisualScriptLanguage *visual_script_language = NULL;
+#ifdef TOOLS_ENABLED
+static _VisualScriptEditor *vs_editor_singleton = NULL;
+#endif
 
 void register_visual_script_types() {
 
-	visual_script_language=memnew( VisualScriptLanguage );
+	visual_script_language = memnew(VisualScriptLanguage);
 	//script_language_gd->init();
 	ScriptServer::register_language(visual_script_language);
 
-	ObjectTypeDB::register_type<VisualScript>();
-	ObjectTypeDB::register_virtual_type<VisualScriptNode>();
-	ObjectTypeDB::register_virtual_type<VisualScriptFunctionState>();
-	ObjectTypeDB::register_type<VisualScriptFunction>();
-	ObjectTypeDB::register_type<VisualScriptOperator>();
-	ObjectTypeDB::register_type<VisualScriptVariableSet>();
-	ObjectTypeDB::register_type<VisualScriptVariableGet>();
-	ObjectTypeDB::register_type<VisualScriptConstant>();
-	ObjectTypeDB::register_type<VisualScriptIndexGet>();
-	ObjectTypeDB::register_type<VisualScriptIndexSet>();
-	ObjectTypeDB::register_type<VisualScriptGlobalConstant>();
-	ObjectTypeDB::register_type<VisualScriptClassConstant>();
-	ObjectTypeDB::register_type<VisualScriptMathConstant>();
-	ObjectTypeDB::register_type<VisualScriptBasicTypeConstant>();
-	ObjectTypeDB::register_type<VisualScriptEngineSingleton>();
-	ObjectTypeDB::register_type<VisualScriptSceneNode>();
-	ObjectTypeDB::register_type<VisualScriptSceneTree>();
-	ObjectTypeDB::register_type<VisualScriptResourcePath>();
-	ObjectTypeDB::register_type<VisualScriptSelf>();
-	ObjectTypeDB::register_type<VisualScriptCustomNode>();
-	ObjectTypeDB::register_type<VisualScriptSubCall>();
-	ObjectTypeDB::register_type<VisualScriptComment>();
-	ObjectTypeDB::register_type<VisualScriptConstructor>();
-	ObjectTypeDB::register_type<VisualScriptLocalVar>();
-	ObjectTypeDB::register_type<VisualScriptLocalVarSet>();
-	ObjectTypeDB::register_type<VisualScriptInputAction>();
-	ObjectTypeDB::register_type<VisualScriptDeconstruct>();
-	ObjectTypeDB::register_type<VisualScriptPreload>();
-	ObjectTypeDB::register_type<VisualScriptTypeCast>();
+	ClassDB::register_class<VisualScript>();
+	ClassDB::register_virtual_class<VisualScriptNode>();
+	ClassDB::register_virtual_class<VisualScriptFunctionState>();
+	ClassDB::register_class<VisualScriptFunction>();
+	ClassDB::register_class<VisualScriptOperator>();
+	ClassDB::register_class<VisualScriptVariableSet>();
+	ClassDB::register_class<VisualScriptVariableGet>();
+	ClassDB::register_class<VisualScriptConstant>();
+	ClassDB::register_class<VisualScriptIndexGet>();
+	ClassDB::register_class<VisualScriptIndexSet>();
+	ClassDB::register_class<VisualScriptGlobalConstant>();
+	ClassDB::register_class<VisualScriptClassConstant>();
+	ClassDB::register_class<VisualScriptMathConstant>();
+	ClassDB::register_class<VisualScriptBasicTypeConstant>();
+	ClassDB::register_class<VisualScriptEngineSingleton>();
+	ClassDB::register_class<VisualScriptSceneNode>();
+	ClassDB::register_class<VisualScriptSceneTree>();
+	ClassDB::register_class<VisualScriptResourcePath>();
+	ClassDB::register_class<VisualScriptSelf>();
+	ClassDB::register_class<VisualScriptCustomNode>();
+	ClassDB::register_class<VisualScriptSubCall>();
+	ClassDB::register_class<VisualScriptComment>();
+	ClassDB::register_class<VisualScriptConstructor>();
+	ClassDB::register_class<VisualScriptLocalVar>();
+	ClassDB::register_class<VisualScriptLocalVarSet>();
+	ClassDB::register_class<VisualScriptInputAction>();
+	ClassDB::register_class<VisualScriptDeconstruct>();
+	ClassDB::register_class<VisualScriptPreload>();
+	ClassDB::register_class<VisualScriptTypeCast>();
 
+	ClassDB::register_class<VisualScriptFunctionCall>();
+	ClassDB::register_class<VisualScriptPropertySet>();
+	ClassDB::register_class<VisualScriptPropertyGet>();
+	//ClassDB::register_type<VisualScriptScriptCall>();
+	ClassDB::register_class<VisualScriptEmitSignal>();
 
-	ObjectTypeDB::register_type<VisualScriptFunctionCall>();
-	ObjectTypeDB::register_type<VisualScriptPropertySet>();
-	ObjectTypeDB::register_type<VisualScriptPropertyGet>();
-//	ObjectTypeDB::register_type<VisualScriptScriptCall>();
-	ObjectTypeDB::register_type<VisualScriptEmitSignal>();
+	ClassDB::register_class<VisualScriptReturn>();
+	ClassDB::register_class<VisualScriptCondition>();
+	ClassDB::register_class<VisualScriptWhile>();
+	ClassDB::register_class<VisualScriptIterator>();
+	ClassDB::register_class<VisualScriptSequence>();
+	//ClassDB::register_class<VisualScriptInputFilter>();
+	ClassDB::register_class<VisualScriptSwitch>();
+	ClassDB::register_class<VisualScriptSelect>();
 
-	ObjectTypeDB::register_type<VisualScriptReturn>();
-	ObjectTypeDB::register_type<VisualScriptCondition>();
-	ObjectTypeDB::register_type<VisualScriptWhile>();
-	ObjectTypeDB::register_type<VisualScriptIterator>();
-	ObjectTypeDB::register_type<VisualScriptSequence>();
-	ObjectTypeDB::register_type<VisualScriptInputFilter>();
-	ObjectTypeDB::register_type<VisualScriptSwitch	>();
+	ClassDB::register_class<VisualScriptYield>();
+	ClassDB::register_class<VisualScriptYieldSignal>();
 
-	ObjectTypeDB::register_type<VisualScriptYield>();
-	ObjectTypeDB::register_type<VisualScriptYieldSignal>();
+	ClassDB::register_class<VisualScriptBuiltinFunc>();
 
-	ObjectTypeDB::register_type<VisualScriptBuiltinFunc>();
-
-
-	ObjectTypeDB::register_type<VisualScriptExpression>();
+	ClassDB::register_class<VisualScriptExpression>();
 
 	register_visual_script_nodes();
 	register_visual_script_func_nodes();
@@ -109,14 +111,15 @@ void register_visual_script_types() {
 	register_visual_script_expression_node();
 
 #ifdef TOOLS_ENABLED
+	ClassDB::register_class<_VisualScriptEditor>();
+	vs_editor_singleton = memnew(_VisualScriptEditor);
+	Engine::get_singleton()->add_singleton(Engine::Singleton("VisualScriptEditor", _VisualScriptEditor::get_singleton()));
+
 	VisualScriptEditor::register_editor();
 #endif
-
-
 }
 
 void unregister_visual_script_types() {
-
 
 	unregister_visual_script_nodes();
 
@@ -124,8 +127,10 @@ void unregister_visual_script_types() {
 
 #ifdef TOOLS_ENABLED
 	VisualScriptEditor::free_clipboard();
+	if (vs_editor_singleton) {
+		memdelete(vs_editor_singleton);
+	}
 #endif
 	if (visual_script_language)
-		memdelete( visual_script_language );
-
+		memdelete(visual_script_language);
 }

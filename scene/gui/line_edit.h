@@ -3,9 +3,10 @@
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
-/*                    http://www.godotengine.org                         */
+/*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2017 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2017 Godot Engine contributors (cf. AUTHORS.md)    */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -37,7 +38,7 @@
 */
 class LineEdit : public Control {
 
-	OBJ_TYPE( LineEdit, Control );
+	GDCLASS(LineEdit, Control);
 
 public:
 	enum Align {
@@ -55,6 +56,7 @@ public:
 		MENU_CLEAR,
 		MENU_SELECT_ALL,
 		MENU_UNDO,
+		MENU_REDO,
 		MENU_MAX
 
 	};
@@ -69,7 +71,10 @@ private:
 	String text;
 	String placeholder;
 	float placeholder_alpha;
+	String ime_text;
+	Point2 ime_selection;
 
+	bool context_menu_enabled;
 	PopupMenu *menu;
 
 	int cursor_pos;
@@ -89,10 +94,22 @@ private:
 		bool drag_attempt;
 	} selection;
 
+	struct TextOperation {
+		int cursor_pos;
+		String text;
+	};
+	List<TextOperation> undo_stack;
+	List<TextOperation>::Element *undo_stack_pos;
+
+	void _clear_undo_stack();
+	void _clear_redo();
+	void _create_undo_state();
+
 	Timer *caret_blink_timer;
 
-
+	static void _ime_text_callback(void *p_self, String p_text, Point2 p_selection);
 	void _text_changed();
+	void _emit_text_change();
 	bool expand_to_text_length;
 
 	bool caret_blink_enabled;
@@ -119,21 +136,23 @@ private:
 	void _editor_settings_changed();
 #endif
 
-	void _input_event(InputEvent p_event);
+	void _gui_input(Ref<InputEvent> p_event);
 	void _notification(int p_what);
-
 
 protected:
 	static void _bind_methods();
+
 public:
 	void set_align(Align p_align);
 	Align get_align() const;
 
-	virtual Variant get_drag_data(const Point2& p_point);
-	virtual bool can_drop_data(const Point2& p_point,const Variant& p_data) const;
-	virtual void drop_data(const Point2& p_point,const Variant& p_data);
+	virtual Variant get_drag_data(const Point2 &p_point);
+	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const;
+	virtual void drop_data(const Point2 &p_point, const Variant &p_data);
 
 	void menu_option(int p_option);
+	void set_context_menu_enabled(bool p_enable);
+	bool is_context_menu_enabled();
 	PopupMenu *get_menu() const;
 
 	void select_all();
@@ -146,8 +165,8 @@ public:
 	String get_placeholder() const;
 	void set_placeholder_alpha(float p_alpha);
 	float get_placeholder_alpha() const;
-	void set_cursor_pos(int p_pos);
-	int get_cursor_pos() const;
+	void set_cursor_position(int p_pos);
+	int get_cursor_position() const;
 	void set_max_length(int p_max_length);
 	int get_max_length() const;
 	void append_at_cursor(String p_text);
@@ -163,6 +182,7 @@ public:
 	void cut_text();
 	void paste_text();
 	void undo();
+	void redo();
 
 	void set_editable(bool p_editable);
 	bool is_editable() const;
@@ -170,20 +190,19 @@ public:
 	void set_secret(bool p_secret);
 	bool is_secret() const;
 
-	void select(int p_from=0, int p_to=-1);
+	void select(int p_from = 0, int p_to = -1);
 
 	virtual Size2 get_minimum_size() const;
 
-	void set_expand_to_text_length(bool p_len);
+	void set_expand_to_text_length(bool p_enabled);
 	bool get_expand_to_text_length() const;
 
 	virtual bool is_text_field() const;
 	LineEdit();
 	~LineEdit();
-
 };
 
-
 VARIANT_ENUM_CAST(LineEdit::Align);
+VARIANT_ENUM_CAST(LineEdit::MenuItems);
 
 #endif
